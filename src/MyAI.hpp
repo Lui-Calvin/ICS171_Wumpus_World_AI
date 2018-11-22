@@ -21,7 +21,8 @@
 #define MYAI_LOCK
 
 #include "Agent.hpp"
-
+#include <vector>
+#include <bits/stdc++.h>
 class MyAI : public Agent
 {
 public:
@@ -65,7 +66,9 @@ private:
 	int goalCol;
 	// 1 = right 2 = up 3 = left 4 = down
 	room** map;
-	int  costMap[7][7] = {{0}};	
+	int  costMap[7][7] = {{0}};
+	std::vector<int> adjList[49];
+	std::vector<int> prevNode;	
 	void updateRoom(int row,int col,bool stench,bool breeze);
 	bool inBounds(int row,int col);
 	void flagPits(int row,int col);
@@ -81,7 +84,7 @@ private:
 	void markSafeWumpus(int row,int col);
 	void clearWumpusFlags();
 	void agentForward();
-	void agentTurnLeft();
+	void turnLeft(int& x);
 	void agentTurnRight();
 	void agentMoveBack();	
 	void agentBoard();
@@ -94,7 +97,13 @@ private:
 	void costBoard();
 	void findGoal();
 	void calculateCost();
-	int distanceFromAgent(int row,int col);	
+	int distanceFromAgent(int row,int col);
+	void djik(int source);
+	void createAdjList();
+	int coordToInt(int row,int col);
+	int intToRow(int x);
+	int intToCol(int x);
+	void printMove(Agent::Action a);	
 	// ======================================================================
 	// YOUR CODE ENDS
 	// ======================================================================

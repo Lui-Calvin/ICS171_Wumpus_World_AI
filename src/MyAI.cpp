@@ -32,6 +32,8 @@ MyAI::MyAI() : Agent()
 	{
 		map[i] = new room[7];
 	}
+	prevNode = std::vector<int>(49,-1);
+	//std::cout << "prevNode size: " << prevNode.size() << std::endl;
 	agentRow = 6;
 	agentCol = 0;
 	agentDir = 1;
@@ -46,6 +48,7 @@ MyAI::MyAI() : Agent()
 	moveSet = false;
 	goalRow = -1;
 	goalCol = -1;
+	findGoal();
 	// ======================================================================
 	// YOUR CODE ENDS
 	// ======================================================================
@@ -64,18 +67,16 @@ Agent::Action MyAI::getAction
 	// YOUR CODE BEGINS
 	// ======================================================================
 	
-	/*
-	cout << "agentRow: " << agentRow << endl;
-	cout << "agentCol: " << agentCol << endl;
-	cout << "agentDir: " << agentDir << endl;
-	cout << "stench: " << stench << endl;
-	cout << "breeze: " << breeze << endl;
-	*/
 	score--;
 	if(score < -200)
 		goldFound = true;
-	if(agentRow == 6 && agentCol == 0 && goldFound)
+	if(agentRow == 6 && agentCol == 0 && (goldFound||breeze))
 	{
+		cout<< "RETURNED HOME RETURNED HOME RETURNED HOME" << endl;
+		delete [] Moves;
+		for(int i =0;i < 7; ++i)
+			delete [] map[i];
+		delete [] map;
 		return CLIMB;
 	}
 	if(!bump)
@@ -99,44 +100,20 @@ Agent::Action MyAI::getAction
 		cout << "GOLD FOUND GOLD FOUND GOLD FOUND GOLD FOUND" << endl;
 		return GRAB;
 	}
-	setMoves();
+	if(agentRow == goalRow && agentCol == goalCol)
+		moveSet = false;
+	//setMoves();
 	//agentBoard();
 	calculateCost();
-	//costBoard();
-	/*
-	std::cout << "Press 'w' to Move Forward  'a' to 'Turn Left' 'd' to 'Turn Right'" << std::endl;
-	std::cout << "Press 's' to Shoot         'g' to 'Grab'      'c' to 'Climb'" << std::endl;	
-	// Get Input
-	std::cout << "Please input: ";
-	char userInput;
-	std::cin >> userInput;
-	std::cin.ignore(9999, '\n');
+	costBoard();
+	findGoal();
+	//cin.get();
+	//djik(42);
+	//getMove();
 	
-	// Return Action Associated with Input
-	if ( userInput == 'w')
-	{
-		agentForward();
-		return FORWARD;
-	}
-	if ( userInput == 'a' )
-	{
-		agentTurnLeft();
-		return TURN_LEFT;
-	}
-	if ( userInput == 'd' )
-	{
-		agentTurnRight();
-		return TURN_RIGHT;
-	}
-	if ( userInput == 's' )
-		return SHOOT;
-	
-	if ( userInput == 'g' )
-		cout << GRAB << endl;
-		return GRAB;
-	
-	return CLIMB;
-	*/
+
+
+	//`return CLIMB;
 	return getMove();	
 	// ======================================================================
 	// YOUR CODE ENDS
@@ -146,7 +123,6 @@ Agent::Action MyAI::getAction
 // ======================================================================
 // YOUR CODE BEGINS
 // ======================================================================
-
 void MyAI::updateRoom(int row, int col,bool stench,bool breeze)
 {
 	//if this room we arrived to this room that means there is no wumpus or pit here
@@ -365,13 +341,13 @@ void MyAI::agentForward()
 	}
 
 }
-void MyAI::agentTurnLeft()
+void MyAI::turnLeft(int& x)
 {
-	if(agentDir == 4)
+	if(x == 4)
 	{
-		agentDir = 1;
+		x = 1;
 	}else {
-		agentDir += 1;
+		x += 1;
 	}
 		
 }
@@ -412,6 +388,7 @@ void MyAI::agentBoard()
 	cout << "Goal: " << goalRow << "," << goalCol << endl;
 	cout << "Gold Found : " << goldFound <<endl;
 	cout << "score: " << score << endl;
+	
 	for(int i = 0;i < 7;++i)
 	{
 		for(int j = 0; j < 7;++j)
@@ -425,6 +402,7 @@ void MyAI::agentBoard()
 		}
 		cout << endl;
 	}
+
 }
 void MyAI::costBoard()
 {
@@ -439,6 +417,8 @@ void MyAI::costBoard()
 }
 Agent::Action MyAI::getMove()
 {
+	//std::cout << "moveIndex: " << moveIndex<<std::endl;
+	/*
 	int bestDir = 0;
 	int bestCost = 3000;
 	bool equalCost = true;
@@ -486,7 +466,7 @@ Agent::Action MyAI::getMove()
 			bestCost = costMap[agentRow+1][agentCol];
 		}
 	}
-	if(numPossibleMoves(agentRow,agentCol) == countEquals(moveCost))
+	if(numPossibleMoves(agentRow,agentCol) == countEquals(moveCost)&& countEquals(moveCost) >= 2)
 	{
 		//cout << "smallest Index" <<smallestIndex(goalDistance) << endl;;
 		bestDir = smallestIndex(goalDistance) + 1;
@@ -499,16 +479,29 @@ Agent::Action MyAI::getMove()
 		agentTurnLeft();
 		return TURN_LEFT;
 	}
-		
-		
-	/*
+	*/
+	//std::cout << "MOVESET: " << moveSet << std::endl;	
 	if(moveSet)
 	{
-		return Moves[moveIndex];	
+		std::cout << "made move" << std::endl;
+		if(Moves[moveIndex] == TURN_LEFT)
+			turnLeft(agentDir);
+		if(Moves[moveIndex] == FORWARD)
+			agentForward();
+		moveIndex++;
+		//printMove(Moves[moveIndex-1]);
+		return Moves[moveIndex-1];	
+	} else {
+		std::cout << "set move" << std::endl;
+		setMoves();
 	}
-	setMoves();
-	return Moves[moveIndex];
-	*/
+	if(Moves[moveIndex] == TURN_LEFT)
+		turnLeft(agentDir);
+	if(Moves[moveIndex] == FORWARD)
+		agentForward();
+	moveIndex++;
+	//printMove(Moves[moveIndex-1]);
+	return Moves[moveIndex-1];
 }
 int MyAI::goalDist(int row,int col)
 {
@@ -561,25 +554,115 @@ int MyAI::smallestIndex(int* goalDist)
 void MyAI::setMoves()
 {
 	//find goal room
-	calculateCost();
+	//std::cout << "SETMOVES" << std::endl;
+	calculateCost();	
+	djik(coordToInt(agentRow,agentCol));
 	findGoal();
-	//find
+	
+	for(int i = 0;i < prevNode.size();++i)
+	{
+		std::cout << setw(7) << i << ':'<< prevNode[i] << " ";
+		if((i-6)%7 == 0&& prevNode[i]!=-1)
+			std::cout << std::endl;
+	}
+	
+	int currDir = agentDir;
+	int currRow = agentRow;
+	int currCol = agentCol;
+	//std::cout << "CurrDir: " << currDir << std::endl;
+	//std::cout << "CurrRow: " << currRow << std::endl;
+	//std::cout << "currCol: " << currCol << std::endl;
+	std::cout << "GoalRow: " << goalRow << std::endl;
+	std::cout << "goalCol: " << goalCol << std::endl;
+	moveIndex = 0;
+	std::vector<int>shortestPath;
+	if(prevNode[coordToInt(goalRow,goalCol)] == -1)
+	{
+		goldFound = true;
+		goalRow = 6;
+		goalCol = 0;
+	}
+	//std::cout << "setMoves checkpoint 2" << std::endl;
+	for(int i = coordToInt(goalRow,goalCol);i != -1; i = prevNode[i])
+		shortestPath.insert(shortestPath.begin(),i);
+	//std::cout << "setMoves checkpoint 1" << std::endl;		
+	//shortestPath.insert(shortestPath.begin(),coordToInt(goalRow,goalCol));
+	/*
+	std::cout << coordToInt(agentRow,agentCol);
+	std::cout <<shortestPath[0];
+	int curr = shortestPath[0];
+	while(curr != coordToInt(agentRow,agentCol))
+	{
+		curr = shortestPath[0];
+		if(prevNode[curr] != -1)
+			shortestPath.insert(shortestPath.begin(),prevNode[curr]);
+		std::cout << shortestPath[0];
+	}
+	std::cout <<std::endl;
+	*/
+	//std::cout << "size of shortestPath: " << shortestPath.size() << std::endl;
+	//for(int i = 0; i < shortestPath.size();++i)
+	//	std::cout << shortestPath[i] << std::endl;
+	//we set to one because we dont try to move to the node we started at
+	for(int i = 1;i < shortestPath.size();++i)
+	{
+		//std::cout << "pfDir: " << (pfDir(intToRow(shortestPath[i]),intToCol(shortestPath[i]),currRow,currCol)+1)<<std::endl; 
+		while(pfDir(intToRow(shortestPath[i]),intToCol(shortestPath[i]),currRow,currCol)+1 != currDir)
+		{
+			//std::cout << "added Left" << std::endl;
+			Moves[moveIndex] = TURN_LEFT;
+			turnLeft(currDir);
+			++moveIndex;
+		}
+		//std::cout << "added forward" << std::endl;
+		Moves[moveIndex] = FORWARD;
+		++moveIndex;
+		switch(currDir)
+		{
+		case 1:
+			++currCol;
+			break;
+		case 2:
+			--currRow;
+			break;
+		case 3: 
+			--currCol;
+			break;
+		case 4: 
+			++currRow;
+			break;
+		}	
+	}
+	moveSet = true;
+	moveIndex = 0;
+	//for(int i = 0;i < shortestPath.size();++i)
+	//	std::cout << shortestPath[i] << std::endl;	
+	 
 }
 void MyAI::findGoal()
 {
+	calculateCost();
 	goalRow = 0;
 	goalCol = 0;
-	for(int i = 0;i < 7;++i)
+	if(goldFound)
 	{
-		for(int j = 0;j < 7;++j)
+		goalRow = 6;
+		goalCol = 0;
+	} else {
+		for(int i = 0;i < 7;++i)
 		{
-			if(costMap[i][j] < costMap[goalRow][goalCol])
-			{
-				goalRow = i;
-				goalCol = j;
-			}
+			for(int j = 0;j < 7;++j)
+			{		
+				if(costMap[i][j] != 0 && costMap[i][j] < costMap[goalRow][goalCol])
+				{
+					goalRow = i;
+					goalCol = j;
+				}
+			}	
 		}
 	}
+	//std::cout << "goalRow: " << goalRow <<std::endl;
+	//std::cout << "goalCol: " << goalCol << std::endl;
 }
 void MyAI::calculateCost()
 {
@@ -587,9 +670,17 @@ void MyAI::calculateCost()
 	{
 		for(int j = 0;j < 7; ++j)
 		{
-			costMap[i][j] = 0;
-			if(map[i][j].searched)
-				costMap[i][j] += 50;
+			if(goldFound)
+			{
+				costMap[i][j] = abs(6-i) + abs(0-j) + abs(abs(i-6)-j);
+			} else {
+				costMap[i][j] = 0;
+				if(map[i][j].searched)
+					costMap[i][j] += 50;
+				costMap[i][j] += distanceFromAgent(i,j);
+			}
+			//costMap[i][j] += distanceFromAgent(i,j);
+			//}
 			if(i <= rowWall || j >= colWall)
 				costMap[i][j] += 1000;
 			if(map[i][j].wumpus)
@@ -600,15 +691,112 @@ void MyAI::calculateCost()
 				costMap[i][j] += 1000;
 			if(countPFlags(i,j) > 0)
 				costMap[i][j] += 200*countPFlags(i,j);
-			costMap[i][j] += distanceFromAgent(i,j);
+			
 		}
 	}
-	if(goldFound)
-		costMap[6][0] = 0;
 }
 int MyAI::distanceFromAgent(int row,int col)
 {
 	return abs(row-agentRow) + abs(col-agentCol);
+}
+void MyAI::djik( int source)
+{
+	createAdjList();
+	std::vector<bool> visited(49);
+	std::vector<int> dist(49,INT_MAX);
+	//for(int i = 0;i < 49;++i)
+	//	std::cout << dist[i] << std::endl;
+	//for(int i = 0;i < 49;++i)
+		//dist[i] = INT_MAX;
+	dist[source] = 0;
+	for(int i = 0;i < 49;++i)
+		prevNode[i] = -1;
+	
+	for(int i = 0;i < 49;++i)
+	{
+		int curr = -1;
+		for(int j = 0;j<49;++j)
+		{
+			if(visited[j])
+				continue;
+			if(curr == -1 || dist[j] < dist[curr])
+				curr = j;
+		}
+		//std::cout << "curr " << curr << "size: " <<  adjList[curr].size() << std::endl;
+		visited[curr] = true;
+		for(int k = 0;k < adjList[curr].size();++k)
+		{
+			int path = dist[curr] + 1;
+			if(path < dist[adjList[curr][k]])
+			{
+				dist[adjList[curr][k]] = path;
+				//std::cout << "DING" << std::endl;		
+				prevNode[adjList[curr][k]] = curr;
+				
+			}
+		}
+	}
+}
+void MyAI::createAdjList()
+{
+	for(int i = 0; i < 7;++i)
+	{
+		for(int j = 0; j < 7; ++j)
+		{
+			adjList[coordToInt(i,j)].clear();
+			if(inBounds(i-1,j) && costMap[i][j] < 200 && costMap[i-1][j] < 200)
+			{
+				adjList[coordToInt(i,j)].push_back(coordToInt(i-1,j));
+			}
+			
+			if(inBounds(i+1,j) && costMap[i][j] < 200 && costMap[i+1][j] < 200)
+			{
+				adjList[coordToInt(i,j)].push_back(coordToInt(i+1,j));
+			}	
+			if(inBounds(i,j-1) && costMap[i][j] < 200 && costMap[i][j-1] < 200)
+			{
+				adjList[coordToInt(i,j)].push_back(coordToInt(i,j-1));
+			}
+			if(inBounds(i,j+1) && costMap[i][j] < 200 && costMap[i][j+1] < 200)
+			{
+				adjList[coordToInt(i,j)].push_back(coordToInt(i,j+1));
+			}			
+		}
+	}
+/*	
+	for(int i = 0;i < 7;++i)
+	{
+		for(int j = 0;j < 7;++j)
+		{
+			cout << "{";
+			for(int k = 0; k < adjList[coordToInt(i,j)].size();++k)
+				cout << adjList[coordToInt(i,j)][k] << ',';
+			cout << "} ";
+		}
+		cout << endl;
+	}
+*/	
+}
+int MyAI::coordToInt(int row,int col)
+{
+	return (row*7)+col;
+}
+int MyAI::intToRow(int x)
+{
+	return x/7;
+}
+int MyAI::intToCol(int x)
+{
+	return x%7;
+}
+void MyAI::printMove(Agent::Action a)
+{
+	if(a == TURN_LEFT)
+		std::cout << "==========turn left==========" << std::endl;
+	if(a == FORWARD)
+		std::cout << "========move forward=========" << std::endl;
+	if(a == TURN_RIGHT)
+		std::cout << "turn right" << std::endl;
 }
 // ======================================================================
 // YOUR CODE ENDS
