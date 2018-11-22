@@ -103,9 +103,9 @@ Agent::Action MyAI::getAction
 	if(agentRow == goalRow && agentCol == goalCol)
 		moveSet = false;
 	//setMoves();
-	//agentBoard();
+	//iagentBoard();
 	calculateCost();
-	costBoard();
+	//costBoard();
 	findGoal();
 	//cin.get();
 	//djik(42);
@@ -123,6 +123,10 @@ Agent::Action MyAI::getAction
 // ======================================================================
 // YOUR CODE BEGINS
 // ======================================================================
+//MyAI::~MyAgent()
+//{
+	
+//}
 void MyAI::updateRoom(int row, int col,bool stench,bool breeze)
 {
 	//if this room we arrived to this room that means there is no wumpus or pit here
@@ -483,7 +487,7 @@ Agent::Action MyAI::getMove()
 	//std::cout << "MOVESET: " << moveSet << std::endl;	
 	if(moveSet)
 	{
-		std::cout << "made move" << std::endl;
+		//std::cout << "made move" << std::endl;
 		if(Moves[moveIndex] == TURN_LEFT)
 			turnLeft(agentDir);
 		if(Moves[moveIndex] == FORWARD)
@@ -492,7 +496,7 @@ Agent::Action MyAI::getMove()
 		//printMove(Moves[moveIndex-1]);
 		return Moves[moveIndex-1];	
 	} else {
-		std::cout << "set move" << std::endl;
+		//std::cout << "set move" << std::endl;
 		setMoves();
 	}
 	if(Moves[moveIndex] == TURN_LEFT)
@@ -558,33 +562,51 @@ void MyAI::setMoves()
 	calculateCost();	
 	djik(coordToInt(agentRow,agentCol));
 	findGoal();
-	
+/*	
 	for(int i = 0;i < prevNode.size();++i)
 	{
 		std::cout << setw(7) << i << ':'<< prevNode[i] << " ";
 		if((i-6)%7 == 0&& prevNode[i]!=-1)
 			std::cout << std::endl;
 	}
-	
+*/	
 	int currDir = agentDir;
 	int currRow = agentRow;
 	int currCol = agentCol;
 	//std::cout << "CurrDir: " << currDir << std::endl;
 	//std::cout << "CurrRow: " << currRow << std::endl;
 	//std::cout << "currCol: " << currCol << std::endl;
-	std::cout << "GoalRow: " << goalRow << std::endl;
-	std::cout << "goalCol: " << goalCol << std::endl;
+	//std::cout << "GoalRow: " << goalRow << std::endl;
+	//std::cout << "goalCol: " << goalCol << std::endl;
 	moveIndex = 0;
 	std::vector<int>shortestPath;
+	/*
 	if(prevNode[coordToInt(goalRow,goalCol)] == -1)
 	{
+		std::cout << "setMove: goal home" << std::endl;
 		goldFound = true;
 		goalRow = 6;
 		goalCol = 0;
 	}
+	*/
 	//std::cout << "setMoves checkpoint 2" << std::endl;
-	for(int i = coordToInt(goalRow,goalCol);i != -1; i = prevNode[i])
+	int x = 0;
+	for(int i = coordToInt(goalRow,goalCol);i != -1 && x < 49; i = prevNode[i])
+	{
 		shortestPath.insert(shortestPath.begin(),i);
+		++x;
+	}
+	if(x > 47)
+	{
+		goldFound = true;
+		goalRow = 6;
+		goalCol = 0;
+		shortestPath.clear();
+		for(int i = coordToInt(goalRow,goalCol);i != -1; i = prevNode[i])
+			shortestPath.insert(shortestPath.begin(),i);
+ 
+	}
+	//std::cout << goalDist(agentRow,agentCol) << ','<<shortestPath.size()<< std::endl;
 	//std::cout << "setMoves checkpoint 1" << std::endl;		
 	//shortestPath.insert(shortestPath.begin(),coordToInt(goalRow,goalCol));
 	/*
