@@ -72,11 +72,13 @@ Agent::Action MyAI::getAction
 		goldFound = true;
 	if(agentRow == 6 && agentCol == 0 && (goldFound||breeze))
 	{
-		cout<< "RETURNED HOME RETURNED HOME RETURNED HOME" << endl;
+//		cout<< "RETURNED HOME RETURNED HOME RETURNED HOME" << endl;
+/*
 		delete [] Moves;
 		for(int i =0;i < 7; ++i)
 			delete [] map[i];
 		delete [] map;
+*/
 		return CLIMB;
 	}
 	if(!bump)
@@ -97,7 +99,7 @@ Agent::Action MyAI::getAction
 	{
 		goldFound = true;
 		moveSet = false;
-		cout << "GOLD FOUND GOLD FOUND GOLD FOUND GOLD FOUND" << endl;
+//		cout << "GOLD FOUND GOLD FOUND GOLD FOUND GOLD FOUND" << endl;
 		return GRAB;
 	}
 	if(agentRow == goalRow && agentCol == goalCol)
@@ -123,10 +125,14 @@ Agent::Action MyAI::getAction
 // ======================================================================
 // YOUR CODE BEGINS
 // ======================================================================
-//MyAI::~MyAgent()
-//{
+MyAI::~MyAI()
+{		
+	delete [] Moves;
+	for(int i =0;i < 7; ++i)
+		delete [] map[i];
+	delete [] map;
 	
-//}
+}
 void MyAI::updateRoom(int row, int col,bool stench,bool breeze)
 {
 	//if this room we arrived to this room that means there is no wumpus or pit here
@@ -398,7 +404,6 @@ void MyAI::agentBoard()
 		for(int j = 0; j < 7;++j)
 		{
 			cout << (map[i][j].searched?'s':'.');
-			//cout << (map[i][j].pit?'O':'.');
 			cout << countPFlags(i,j)<<"{" << map[i][j].pitFlags[0] << map[i][j].pitFlags[1] << map[i][j].pitFlags[2] << map[i][j].pitFlags[3] << "}";
 			cout << (map[i][j].wumpusFlag?'f':'.');
 			cout << (map[i][j].wumpus?'w':'.');
@@ -421,69 +426,6 @@ void MyAI::costBoard()
 }
 Agent::Action MyAI::getMove()
 {
-	//std::cout << "moveIndex: " << moveIndex<<std::endl;
-	/*
-	int bestDir = 0;
-	int bestCost = 3000;
-	bool equalCost = true;
-	findGoal(); 
-	int moveCost[4] = {3000,3000,3000,3000};
-	int goalDistance[4] = {100,100,100,100};
-	if(inBounds(agentRow,agentCol+1) )
-	{
-		moveCost[0] = costMap[agentRow][agentCol+1];
-		goalDistance[0] = goalDist(agentRow,agentCol-1);
-		if(moveCost[0] < bestCost)
-		{ 
-			bestDir = 1;
-			bestCost = costMap[agentRow][agentCol+1];
-		}
-	}
-	if(inBounds(agentRow-1,agentCol))
-	{
-		moveCost[1] =  costMap[agentRow-1][agentCol];
-		goalDistance[1] = goalDist(agentRow-1,agentCol-1); 
-		if(moveCost[1] < bestCost)
-		{
-			bestDir = 2;
-			bestCost = costMap[agentRow-1][agentCol];
-		}
-	}
-	
-	if(inBounds(agentRow,agentCol-1))
-	{
-		moveCost[2] = costMap[agentRow][agentCol-1];
-		goalDistance[2] = goalDist(agentRow,agentCol-1);
-		if(moveCost[2] < bestCost)
-		{
-			bestDir = 3;
-			bestCost = costMap[agentRow][agentCol-1];
-		}
-	}	
-	if(inBounds(agentRow+1,agentCol) )
-	{
-		moveCost[3] = costMap[agentRow+1][agentCol];
-		goalDistance[3] = goalDist(agentRow+1,agentCol);
-		if(moveCost[3] < bestCost)
-		{
-			bestDir = 4;
-			bestCost = costMap[agentRow+1][agentCol];
-		}
-	}
-	if(numPossibleMoves(agentRow,agentCol) == countEquals(moveCost)&& countEquals(moveCost) >= 2)
-	{
-		//cout << "smallest Index" <<smallestIndex(goalDistance) << endl;;
-		bestDir = smallestIndex(goalDistance) + 1;
-	}
-	if(agentDir == bestDir)
-	{
-		agentForward();	
-		return FORWARD;
-	} else {
-		agentTurnLeft();
-		return TURN_LEFT;
-	}
-	*/
 	//std::cout << "MOVESET: " << moveSet << std::endl;	
 	if(moveSet)
 	{
@@ -726,10 +668,6 @@ void MyAI::djik( int source)
 	createAdjList();
 	std::vector<bool> visited(49);
 	std::vector<int> dist(49,INT_MAX);
-	//for(int i = 0;i < 49;++i)
-	//	std::cout << dist[i] << std::endl;
-	//for(int i = 0;i < 49;++i)
-		//dist[i] = INT_MAX;
 	dist[source] = 0;
 	for(int i = 0;i < 49;++i)
 		prevNode[i] = -1;
